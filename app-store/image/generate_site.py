@@ -448,8 +448,11 @@ class DockerSource:
 
     def landing_section(self):
         return f'''<section class="source">
-  <h2><a href="/{self.slug}/">{escape(self.title)}</a></h2>
-  <p class="source-desc">{escape(self.description)}</p>
+  <a class="source-link" href="/{self.slug}/" aria-label="{escape(self.title)}"></a>
+  <div class="source-head">
+    <h2>{escape(self.title)}</h2>
+    <p class="source-desc">{escape(self.description)}</p>
+  </div>
   {self.render_image_list()}
 </section>'''
 
@@ -471,7 +474,6 @@ class DockerSource:
         os.makedirs(base_dir, exist_ok=True)
         body = f'''<header>
   <h1><a href="/">{escape(SITE_TITLE)}</a></h1>
-  <p class="subtitle">{escape(SITE_SUBTITLE)}</p>
 </header>
 <main>
   {back_arrow('/', 'Available Software')}
