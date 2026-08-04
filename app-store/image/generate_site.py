@@ -328,8 +328,8 @@ class AndroidSource:
 
     def instructions(self):
         fp = self.fingerprint or '(unknown)'
-        return f'''<section class="instructions">
-  <h2>Setup</h2>
+        return f'''<details class="instructions">
+  <summary>Setup</summary>
   <p>Add this repository to the F-Droid client on your Android device:</p>
   <ol>
     <li>Open F-Droid and go to <em>Settings &rarr; Repositories</em>.</li>
@@ -340,7 +340,7 @@ class AndroidSource:
     <li>Refresh the F-Droid repository list and install apps from
       <strong>{escape(self.repo_name)}</strong>.</li>
   </ol>
-</section>'''
+</details>'''
 
     def write(self, base_dir):
         os.makedirs(base_dir, exist_ok=True)
@@ -458,8 +458,8 @@ class DockerSource:
 
     def instructions(self):
         url = self.registry_url or '<registry>'
-        return f'''<section class="instructions">
-  <h2>Setup</h2>
+        return f'''<details class="instructions">
+  <summary>Setup</summary>
   <p>Pull images from this registry with the Docker client:</p>
   <ol>
     <li>Log in to the registry (if it requires authentication):
@@ -468,7 +468,7 @@ class DockerSource:
       <pre><code>docker pull {escape(url)}/&lt;image&gt;:&lt;tag&gt;</code></pre></li>
   </ol>
   <p>The registry API endpoint is <code>{escape(url)}/v2/</code>.</p>
-</section>'''
+</details>'''
 
     def write(self, base_dir):
         os.makedirs(base_dir, exist_ok=True)

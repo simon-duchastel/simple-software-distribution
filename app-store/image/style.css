@@ -229,28 +229,69 @@ main {
   text-decoration: underline;
 }
 
-/* Setup instructions block. */
+/* Setup instructions block (collapsible). */
 .instructions {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 20px;
   margin-bottom: 24px;
 }
 
-.instructions h2 {
+.instructions > summary {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.instructions ol {
-  margin: 0;
+.instructions > summary::-webkit-details-marker {
+  display: none;
+}
+
+.instructions > summary::after {
+  content: "\25B8";
+  color: var(--muted);
+  transition: transform 0.1s;
+}
+
+.instructions[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.instructions[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.instructions > *:not(summary) {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+/* Intro line sits close to the left edge, aligned with the summary. */
+.instructions > p {
   padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 4px;
+  padding-top: 16px;
+  margin: 0;
+}
+
+/* Numbered list indented further so the numbers clearly nest under the intro. */
+.instructions > ol {
+  padding: 4px 20px 20px 44px;
+  margin: 0;
 }
 
 .instructions li {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.instructions p:last-child {
+  padding-bottom: 20px;
 }
 
 .instructions pre {
