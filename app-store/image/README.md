@@ -1,6 +1,15 @@
 # app-store image
 
-A small Docker image that turns a folder of APKs into a signed F-Droid repository and serves it with nginx, plus a static, no-JavaScript web UI for browsing apps.
+A small Docker image that turns a folder of APKs into a signed F-Droid
+repository and serves it with nginx, plus a static, no-JavaScript web UI.
+
+`generate_site.py` renders the site. It produces a landing page
+(`/`, titled **Available Software**) listing every distribution source, and one
+subpage per source at `/<source>/` with setup instructions and the artifact
+list. Sources are pluggable: today only the **Android** (F-Droid) source is
+implemented. Add a source by creating a class with `landing_section()`,
+`instructions()`, and `write(base_dir)` methods and appending it to the
+`sources` list in `main()`.
 
 ## Required environment variables
 
