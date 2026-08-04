@@ -1,0 +1,23 @@
+services:
+  appstore:
+    build:
+      context: ../image
+    container_name: appstore
+    restart: unless-stopped
+    ports:
+      - "${APPSTORE_PORT:-8097}:80"
+    volumes:
+      - ${APK_DIR:-/mnt/bob-storage/code/binaries/android/apks}:/data/apks:ro
+      - ${METADATA_DIR:-/mnt/bob-storage/code/binaries/android/appstore/metadata}:/data/metadata:ro
+      - ${SECRETS_DIR:-/mnt/bob-storage/code/binaries/android/appstore/secrets}:/secrets:ro
+      - ${FDROID_DATA_DIR:-/mnt/nvme01/appstore-fdroid-data}:/data/fdroid
+    environment:
+      - APPSTORE_REPO_URL=${APPSTORE_REPO_URL}
+      - APPSTORE_REPO_NAME=${APPSTORE_REPO_NAME}
+      - APPSTORE_REPO_DESCRIPTION=${APPSTORE_REPO_DESCRIPTION}
+      - APPSTORE_KEY_ALIAS=${APPSTORE_KEY_ALIAS}
+      - APPSTORE_KEYSTORE=${APPSTORE_KEYSTORE}
+      - APPSTORE_KEYSTORE_PASS_CMD=${APPSTORE_KEYSTORE_PASS_CMD}
+      - APPSTORE_KEY_PASS_CMD=${APPSTORE_KEY_PASS_CMD}
+      - APPSTORE_SCAN_INTERVAL=${APPSTORE_SCAN_INTERVAL:-15m}
+      - TZ=${TZ:-America/Los_Angeles}

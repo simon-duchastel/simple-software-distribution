@@ -1,0 +1,150 @@
+:root {
+  --bg: #f8f9fa;
+  --card: #fff;
+  --text: #212529;
+  --muted: #6c757d;
+  --accent: #0d6efd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --text: #e0e0e0;
+    --muted: #a0a0a0;
+    --accent: #4dabf7;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+header, footer {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+header p {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.app-card {
+  background: var(--card);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s;
+}
+
+.app-card:hover {
+  transform: translateY(-2px);
+}
+
+.app-card img {
+  width: 64px;
+  height: 64px;
+  border-radius: 0.75rem;
+  display: block;
+  margin-bottom: 0.75rem;
+  object-fit: cover;
+}
+
+.app-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.app-summary {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.detail {
+  background: var(--card);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.detail-header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.detail-header img {
+  width: 96px;
+  height: 96px;
+  border-radius: 1rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.detail h2 {
+  margin: 0 0 0.25rem;
+}
+
+.description {
+  white-space: pre-wrap;
+}
+
+.meta {
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.empty, .error {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem;
+}
+
+footer {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+footer code {
+  background: var(--card);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  word-break: break-all;
+}
+
+footer button {
+  margin-left: 0.5rem;
+}
