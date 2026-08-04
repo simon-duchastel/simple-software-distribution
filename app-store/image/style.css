@@ -1,150 +1,358 @@
 :root {
-  --bg: #f8f9fa;
+  --bg: #fafafa;
   --card: #fff;
-  --text: #212529;
-  --muted: #6c757d;
-  --accent: #0d6efd;
+  --text: #1a1a1a;
+  --muted: #666;
+  --border: #e5e5e5;
+  --accent: #0066cc;
+  --hover: #f5f5f5;
+  --code-bg: #f0f0f0;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121212;
-    --card: #1e1e1e;
-    --text: #e0e0e0;
-    --muted: #a0a0a0;
-    --accent: #4dabf7;
+    --bg: #1a1a1a;
+    --card: #242424;
+    --text: #e8e8e8;
+    --muted: #999;
+    --border: #333;
+    --accent: #66b3ff;
+    --hover: #2a2a2a;
+    --code-bg: #2a2a2a;
   }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin: 0;
+  line-height: 1.6;
+  font-size: 16px;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.5;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
 }
 
-header, footer {
-  padding: 1.5rem;
-  text-align: center;
+header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border);
 }
 
 header h1 {
-  margin: 0;
-  font-size: 1.75rem;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-header p {
-  margin: 0.5rem 0 0;
+header h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.subtitle {
   color: var(--muted);
+  font-size: 15px;
 }
 
 main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
-.app-grid {
+/* Landing page: one section per distribution source. */
+.source {
+  position: relative;
+  border-top: 1px solid var(--border);
+  padding: 20px 12px;
+  margin: 0 -12px;
+  border-radius: 8px;
+  transition: background 0.1s;
+}
+
+.source:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
+/* Stretched overlay: the whole section is clickable to the subpage. */
+.source-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.source:hover {
+  background: var(--hover);
+}
+
+.source-head {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+  margin-bottom: 16px;
+}
+
+.source:hover .source-head h2 {
+  color: var(--accent);
+}
+
+/* Don't light up the whole section while hovering one of its cards. */
+.source:has(.card:hover) {
+  background: transparent;
+}
+
+.source:has(.card:hover) .source-head h2 {
+  color: inherit;
+}
+
+.source h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.source-desc {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+/* Cards (and image lists) sit above the overlay and keep their own links. */
+.card-grid,
+.image-list,
+.empty {
+  position: relative;
+  z-index: 2;
+}
+
+/* Card grid used for apps (and other artifact lists). */
+.card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
 }
 
-.app-card {
+.card {
   background: var(--card);
-  border-radius: 0.75rem;
-  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.1s;
+  transition: border-color 0.1s;
 }
 
-.app-card:hover {
-  transform: translateY(-2px);
+.card:hover {
+  border-color: var(--accent);
 }
 
-.app-card img {
-  width: 64px;
-  height: 64px;
-  border-radius: 0.75rem;
+.card a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
   display: block;
-  margin-bottom: 0.75rem;
+  margin-bottom: 8px;
   object-fit: cover;
 }
 
-.app-name {
+.card h3 {
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 2px;
 }
 
-.app-summary {
-  font-size: 0.875rem;
+.card p {
+  font-size: 13px;
   color: var(--muted);
 }
 
-.detail {
-  background: var(--card);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+/* Back arrow on subpages. */
+.back {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
 }
 
-.detail-header {
+.back:hover {
+  text-decoration: underline;
+}
+
+/* Setup instructions block. */
+.instructions {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.instructions h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.instructions ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.instructions li {
+  margin-bottom: 10px;
+}
+
+.instructions pre {
+  margin: 6px 0 0;
+  overflow-x: auto;
+}
+
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+pre code {
+  display: block;
+  padding: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+pre code.fingerprint {
+  font-size: 12px;
+}
+
+/* App detail page. */
+.detail {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.detail-head {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 16px;
+  margin-bottom: 16px;
   align-items: flex-start;
 }
 
-.detail-header img {
-  width: 96px;
-  height: 96px;
-  border-radius: 1rem;
+.detail-head img {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
   object-fit: cover;
   flex-shrink: 0;
 }
 
 .detail h2 {
-  margin: 0 0 0.25rem;
+  font-size: 22px;
+  margin-bottom: 4px;
 }
 
-.description {
-  white-space: pre-wrap;
+.detail h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 20px 0 8px;
 }
 
 .meta {
   color: var(--muted);
-  font-size: 0.875rem;
-  margin: 0;
+  font-size: 13px;
 }
 
-.back {
-  display: inline-block;
-  margin-bottom: 1rem;
+.description {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: transparent;
+  padding: 0;
+}
+
+.downloads {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.downloads li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.downloads li:last-child {
+  border-bottom: none;
+}
+
+.downloads a {
   color: var(--accent);
   text-decoration: none;
 }
 
-.empty, .error {
+.downloads a:hover {
+  text-decoration: underline;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.empty {
   text-align: center;
   color: var(--muted);
-  padding: 2rem;
+  padding: 24px;
 }
 
 footer {
-  font-size: 0.875rem;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
   color: var(--muted);
 }
 
-footer code {
-  background: var(--card);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
+footer p {
+  margin-bottom: 4px;
   word-break: break-all;
 }
 
-footer button {
-  margin-left: 0.5rem;
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 20px 16px;
+  }
+  header h1 {
+    font-size: 24px;
+  }
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
 }

@@ -1,8 +1,14 @@
 # App Store
 
-A self-hosted, F-Droid-compatible Android app store. A small Docker image turns
-a folder of APKs into a signed F-Droid repository and serves it with nginx,
-plus a static, no-JavaScript web UI for browsing apps.
+A self-hosted software distribution site. A small Docker image turns a folder
+of APKs into a signed F-Droid repository and serves it with nginx, plus a
+static, no-JavaScript web UI.
+
+The site has a landing page titled **Available Software** that lists every
+distribution source as a section. Each source has its own subpage at
+`/<source>/` with setup instructions, the artifact list, and a back arrow to
+the landing page. Today the only source is **Android** (the F-Droid app store);
+additional sources can be added by extending `image/generate_site.py`.
 
 ## Layout
 

@@ -8,4 +8,5 @@ A simple way to distribute your own software.
 
 A self-hosted, F-Droid-compatible Android app store. A Docker image builds a
 signed F-Droid repository from a folder of APKs and serves it with a static,
-no-JavaScript web UI for browsing and downloading apps.
+no-JavaScript web UI. Android apps are listed under the **Android** source on
+the site, with F-Droid repository setup instructions on the `/android/` subpage.

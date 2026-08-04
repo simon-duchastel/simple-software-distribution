@@ -1,6 +1,7 @@
 # app-store image
 
-A small Docker image that turns a folder of APKs into a signed F-Droid repository and serves it with nginx, plus a static, no-JavaScript web UI for browsing apps.
+A small Docker image that turns a folder of APKs into a signed F-Droid
+repository and serves it with nginx, plus a static, no-JavaScript web UI.
 
 ## Required environment variables
 
