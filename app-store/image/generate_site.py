@@ -434,7 +434,8 @@ class DockerSource:
                     meta.append(format_date(t['created']))
                 if t['size']:
                     meta.append(format_bytes(t['size']))
-                meta_html = (f'<span class="muted">{escape(" \u00b7 ".join(meta))}</span>'
+                sep = ' \u00b7 '
+                meta_html = (f'<span class="muted">{escape(sep.join(meta))}</span>'
                              if meta else '')
                 tag_rows.append(
                     f'<li><code>{escape(self._pull_ref(img["name"], t["tag"]))}</code>'
