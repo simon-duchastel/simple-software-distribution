@@ -11,6 +11,7 @@ services:
       - ${METADATA_DIR:-/mnt/bob-storage/code/binaries/android/appstore/metadata}:/data/metadata:ro
       - ${SECRETS_DIR:-/mnt/bob-storage/code/binaries/android/appstore/secrets}:/secrets:ro
       - ${FDROID_DATA_DIR:-/mnt/nvme01/appstore-fdroid-data}:/data/fdroid
+      - ${DOCKER_REGISTRY_DIR:-/mnt/bob-storage/code/binaries/docker/registry/docker}:/data/registry:ro
     environment:
       - APPSTORE_REPO_URL=${APPSTORE_REPO_URL}
       - APPSTORE_REPO_NAME=${APPSTORE_REPO_NAME}
@@ -20,4 +21,5 @@ services:
       - APPSTORE_KEYSTORE_PASS_CMD=${APPSTORE_KEYSTORE_PASS_CMD}
       - APPSTORE_KEY_PASS_CMD=${APPSTORE_KEY_PASS_CMD}
       - APPSTORE_SCAN_INTERVAL=${APPSTORE_SCAN_INTERVAL:-15m}
+      - APPSTORE_DOCKER_REGISTRY_URL=${APPSTORE_DOCKER_REGISTRY_URL:-}
       - TZ=${TZ:-America/Los_Angeles}
