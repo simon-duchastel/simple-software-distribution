@@ -31,5 +31,3 @@ The container will refuse to start unless these are set:
   `registry/v2/...`.
 - `APPSTORE_DOCKER_REGISTRY_URL` — public URL of the Docker registry, used in
   the `docker pull` commands shown on the `/docker/` subpage (default: empty).
-
-See `.env.example` for a concrete configuration.

@@ -16,9 +16,13 @@ extending `image/generate_site.py`.
 ```
 app-store/
 ├── image/      # the Docker image (Dockerfile, entrypoint, web UI generator)
-├── deploy/     # docker-compose deployment and runtime config
 └── scripts/    # keystore setup, fingerprint printing, and APK publishing
 ```
+
+Deployment wiring (docker-compose, runtime environment) lives outside this
+repository. See [`image/README.md`](image/README.md) for the image's required
+and optional environment variables, then run the image with those variables
+set and the APK, metadata, secrets, and F-Droid data directories mounted.
 
 ## Quick start
 
@@ -28,20 +32,12 @@ app-store/
    ./scripts/init-keystore.sh
    ```
 
-2. Start the service:
-
-   ```bash
-   cd deploy
-   cp .env.example .env
-   docker compose up -d --build
-   ```
+2. Build and run the image, mounting your APKs, metadata, secrets, and
+   F-Droid data, and setting the environment variables from
+   [`image/README.md`](image/README.md).
 
 3. Publish an APK:
 
    ```bash
    ./scripts/add-apk.sh /path/to/my-app-1.2.0.apk
    ```
-
-See [`deploy/README.md`](deploy/README.md) for the full NAS layout and
-configuration, and [`image/README.md`](image/README.md) for the image's
-environment variables.
