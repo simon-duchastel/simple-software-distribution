@@ -20,11 +20,4 @@ mkdir -p "$DEST_DIR"
 
 cp "$APK_PATH" "$DEST_DIR/"
 echo "Copied $(basename "$APK_PATH") to $DEST_DIR"
-
-COMPOSE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../deploy" && pwd)"
-if [ -d "$COMPOSE_DIR" ]; then
-    (cd "$COMPOSE_DIR" && docker compose restart appstore)
-    echo "Appstore container restarted; the repo will rebuild shortly."
-else
-    echo "Restart the appstore container manually to publish the new APK."
-fi
+echo "Restart the appstore container to publish the new APK."
