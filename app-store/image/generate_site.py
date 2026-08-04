@@ -23,7 +23,6 @@ STYLE_FILE = 'style.css'
 HASH_FILE = os.path.join(WEBUI_DIR, '.source_hash')
 
 SITE_TITLE = 'Available Software'
-SITE_SUBTITLE = 'Self-hosted software distribution'
 
 
 def repo_path(filename):
@@ -160,7 +159,6 @@ def render_app_detail(app, repo_name, repo_url):
 
     body = f'''<header>
   <h1><a href="/">{escape(SITE_TITLE)}</a></h1>
-  <p class="subtitle">{escape(SITE_SUBTITLE)}</p>
 </header>
 <main>
   {back_arrow('/android/', 'Android')}
@@ -219,8 +217,11 @@ class AndroidSource:
         items = render_app_cards(self.apps) if self.apps else \
             '<p class="empty">No apps published yet.</p>'
         return f'''<section class="source">
-  <h2><a href="/{self.slug}/">{escape(self.title)}</a></h2>
-  <p class="source-desc">{escape(self.description)}</p>
+  <a class="source-link" href="/{self.slug}/" aria-label="{escape(self.title)}"></a>
+  <div class="source-head">
+    <h2>{escape(self.title)}</h2>
+    <p class="source-desc">{escape(self.description)}</p>
+  </div>
   {items}
 </section>'''
 
@@ -244,7 +245,6 @@ class AndroidSource:
         os.makedirs(base_dir, exist_ok=True)
         body = f'''<header>
   <h1><a href="/">{escape(SITE_TITLE)}</a></h1>
-  <p class="subtitle">{escape(SITE_SUBTITLE)}</p>
 </header>
 <main>
   {back_arrow('/', 'Available Software')}
@@ -274,7 +274,6 @@ def render_landing(sources):
     sections = '\n'.join(src.landing_section() for src in sources)
     body = f'''<header>
   <h1>{escape(SITE_TITLE)}</h1>
-  <p class="subtitle">{escape(SITE_SUBTITLE)}</p>
 </header>
 <main>
 {sections}

@@ -69,13 +69,48 @@ main {
 
 /* Landing page: one section per distribution source. */
 .source {
+  position: relative;
   border-top: 1px solid var(--border);
-  padding-top: 20px;
+  padding: 20px 12px;
+  margin: 0 -12px;
+  border-radius: 8px;
+  transition: background 0.1s;
 }
 
 .source:first-child {
   border-top: none;
-  padding-top: 0;
+  margin-top: 0;
+}
+
+/* Stretched overlay: the whole section is clickable to the subpage. */
+.source-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.source:hover {
+  background: var(--hover);
+}
+
+.source-head {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+  margin-bottom: 16px;
+}
+
+.source:hover .source-head h2 {
+  color: var(--accent);
+}
+
+/* Don't light up the whole section while hovering one of its cards. */
+.source:has(.card:hover) {
+  background: transparent;
+}
+
+.source:has(.card:hover) .source-head h2 {
+  color: inherit;
 }
 
 .source h2 {
@@ -84,19 +119,18 @@ main {
   margin-bottom: 4px;
 }
 
-.source h2 a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.source h2 a:hover {
-  color: var(--accent);
-}
-
 .source-desc {
   color: var(--muted);
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
+}
+
+/* Cards (and image lists) sit above the overlay and keep their own links. */
+.card-grid,
+.image-list,
+.empty {
+  position: relative;
+  z-index: 2;
 }
 
 /* Card grid used for apps (and other artifact lists). */
@@ -113,11 +147,10 @@ main {
   padding: 12px;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.1s, border-color 0.1s;
+  transition: border-color 0.1s;
 }
 
 .card:hover {
-  transform: translateY(-2px);
   border-color: var(--accent);
 }
 
