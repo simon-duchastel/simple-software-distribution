@@ -3,6 +3,14 @@
 A small Docker image that turns a folder of APKs into a signed F-Droid
 repository and serves it with nginx, plus a static, no-JavaScript web UI.
 
+`generate_site.py` renders the site. It produces a landing page
+(`/`, titled **Available Software**) listing every distribution source, and one
+subpage per source at `/<source>/` with setup instructions and the artifact
+list. Sources are pluggable: today the **Android** (F-Droid) and **Docker** (local
+registry) sources are implemented. Add a source by creating a class with
+`landing_section()`, `instructions()`, and `write(base_dir)` methods and
+appending it to the `sources` list in `main()`.
+
 ## Required environment variables
 
 The container will refuse to start unless these are set:
@@ -18,5 +26,10 @@ The container will refuse to start unless these are set:
 - `APPSTORE_REPO_NAME` — display name of the repo (default: `App Store`).
 - `APPSTORE_REPO_DESCRIPTION` — short description (default: `F-Droid app store`).
 - `APPSTORE_SCAN_INTERVAL` — how often to re-scan for new APKs (default: `15m`).
+- `APPSTORE_DOCKER_REGISTRY_DIR` — path to the Docker registry storage root
+  inside the container (default: `/data/registry`). The directory must contain
+  `registry/v2/...`.
+- `APPSTORE_DOCKER_REGISTRY_URL` — public URL of the Docker registry, used in
+  the `docker pull` commands shown on the `/docker/` subpage (default: empty).
 
 See `.env.example` for a concrete configuration.

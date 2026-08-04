@@ -28,8 +28,15 @@ APKs, metadata, and signing secrets are kept on the NAS under
 - `appstore/secrets/` — F-Droid repo signing keystore and passwords.
 
 All host paths are configurable via the `APK_DIR`, `METADATA_DIR`,
-`SECRETS_DIR`, and `FDROID_DATA_DIR` environment variables (see
-`.env.example`).
+`SECRETS_DIR`, `FDROID_DATA_DIR`, and `DOCKER_REGISTRY_DIR` environment
+variables (see `.env.example`).
+
+## Docker images
+
+The container also scans a local Docker registry (mounted read-only at
+`/data/registry`) and lists its published images on the `/docker/` subpage
+with `docker pull` setup instructions. Set `APPSTORE_DOCKER_REGISTRY_URL` to the
+registry's public address so the pull commands are correct.
 
 ## First-time setup
 

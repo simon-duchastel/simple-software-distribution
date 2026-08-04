@@ -22,6 +22,10 @@ WEBUI_DIR = '/data/webui'
 STYLE_FILE = 'style.css'
 HASH_FILE = os.path.join(WEBUI_DIR, '.source_hash')
 
+# Docker registry data root (the directory that contains registry/v2/...).
+DOCKER_REGISTRY_DIR = os.environ.get('APPSTORE_DOCKER_REGISTRY_DIR', '/data/registry')
+DOCKER_REGISTRY_URL = os.environ.get('APPSTORE_DOCKER_REGISTRY_URL', '').rstrip('/')
+
 SITE_TITLE = 'Available Software'
 
 
@@ -42,6 +46,101 @@ def format_bytes(n):
         n /= 1024
         i += 1
     return f'{n:.1f} {units[i]}'
+
+
+def format_date(s):
+    if not s:
+        return ''
+    try:
+        from datetime import datetime
+        dt = datetime.fromisoformat(s.replace('Z', '+00:00'))
+        return dt.strftime('%Y-%m-%d')
+    except Exception:
+        return s[:10]
+
+
+def docker_repos_dir():
+    return os.path.join(DOCKER_REGISTRY_DIR, 'registry', 'v2', 'repositories')
+
+
+def docker_blobs_dir():
+    return os.path.join(DOCKER_REGISTRY_DIR, 'registry', 'v2', 'blobs', 'sha256')
+
+
+def docker_blob_path(digest):
+    hexd = digest.split(':', 1)[1] if ':' in digest else digest
+    return os.path.join(docker_blobs_dir(), hexd[:2], hexd, 'data')
+
+
+def read_json(path):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
+def docker_manifest_info(digest, seen=None):
+    """Return (created, total_size) for a manifest or image-index digest."""
+    if seen is None:
+        seen = set()
+    if digest in seen:
+        return None, 0
+    seen.add(digest)
+    data = read_json(docker_blob_path(digest))
+    if not data:
+        return None, 0
+    # An OCI/Docker image index lists per-platform manifests.
+    if 'manifests' in data:
+        created = None
+        total = 0
+        for m in data['manifests']:
+            plat = m.get('platform', {})
+            if plat.get('os') == 'unknown' and plat.get('architecture') == 'unknown':
+                continue  # attestation manifest, not a real image
+            c, t = docker_manifest_info(m.get('digest'), seen)
+            if created is None:
+                created = c
+            total += t
+        return created, total
+    # A single image manifest references a config blob and layer blobs.
+    total = 0
+    cfg = data.get('config', {})
+    total += cfg.get('size', 0)
+    for layer in data.get('layers', []):
+        total += layer.get('size', 0)
+    created = None
+    cfg_digest = cfg.get('digest')
+    if cfg_digest:
+        cfg_data = read_json(docker_blob_path(cfg_digest))
+        if cfg_data:
+            created = cfg_data.get('created')
+    return created, total
+
+
+def docker_catalog_hash():
+    """Lightweight hash of published repos/tags so new pushes trigger a rebuild."""
+    hasher = hashlib.sha256()
+    repos_dir = docker_repos_dir()
+    if not os.path.isdir(repos_dir):
+        return hasher.hexdigest()
+    for root, dirs, _ in os.walk(repos_dir):
+        if '_manifests' in dirs:
+            name = os.path.relpath(root, repos_dir)
+            hasher.update(name.encode())
+            hasher.update(b'\0')
+            tags_dir = os.path.join(root, '_manifests', 'tags')
+            if os.path.isdir(tags_dir):
+                for tag in sorted(os.listdir(tags_dir)):
+                    link = os.path.join(tags_dir, tag, 'current', 'link')
+                    digest = ''
+                    if os.path.exists(link):
+                        with open(link) as f:
+                            digest = f.read().strip()
+                    hasher.update(f'{tag}:{digest}'.encode())
+                    hasher.update(b'\0')
+            dirs[:] = [d for d in dirs if d not in ('_manifests', '_layers', '_uploads')]
+    return hasher.hexdigest()
 
 
 def page(title, body):
@@ -75,6 +174,8 @@ def source_hash():
             with open(path, 'rb') as f:
                 hasher.update(f.read())
         hasher.update(b'\0')
+    hasher.update(b'docker:')
+    hasher.update(docker_catalog_hash().encode())
     return hasher.hexdigest()
 
 
@@ -270,6 +371,119 @@ class AndroidSource:
                 f.write(render_app_detail(app, self.repo_name, self.repo_url))
 
 
+class DockerSource:
+    """Container images served from a local Docker registry."""
+
+    slug = 'docker'
+    title = 'Docker'
+    description = 'Container images served from a local Docker registry.'
+
+    def __init__(self, registry_url):
+        self.registry_url = registry_url
+        self.images = self._load()
+
+    @property
+    def available(self):
+        return bool(self.images)
+
+    @property
+    def count(self):
+        return len(self.images)
+
+    def _load(self):
+        repos_dir = docker_repos_dir()
+        if not os.path.isdir(repos_dir):
+            return []
+        images = []
+        for root, dirs, _ in os.walk(repos_dir):
+            if '_manifests' not in dirs:
+                continue
+            name = os.path.relpath(root, repos_dir)
+            tags_dir = os.path.join(root, '_manifests', 'tags')
+            tags = []
+            if os.path.isdir(tags_dir):
+                for tag in sorted(os.listdir(tags_dir)):
+                    link = os.path.join(tags_dir, tag, 'current', 'link')
+                    if not os.path.exists(link):
+                        continue
+                    with open(link) as f:
+                        digest = f.read().strip()
+                    created, size = docker_manifest_info(digest)
+                    tags.append({'tag': tag, 'created': created,
+                                 'size': size, 'digest': digest})
+            if tags:
+                images.append({'name': name, 'tags': tags})
+            dirs[:] = [d for d in dirs if d not in ('_manifests', '_layers', '_uploads')]
+        images.sort(key=lambda i: i['name'])
+        return images
+
+    def _pull_ref(self, name, tag):
+        if self.registry_url:
+            return f'{self.registry_url}/{name}:{tag}'
+        return f'<registry>/{name}:{tag}'
+
+    def render_image_list(self):
+        if not self.images:
+            return '<p class="empty">No images published yet.</p>'
+        items = []
+        for img in self.images:
+            tag_rows = []
+            for t in img['tags']:
+                meta = []
+                if t['created']:
+                    meta.append(format_date(t['created']))
+                if t['size']:
+                    meta.append(format_bytes(t['size']))
+                meta_html = (f'<span class="muted">{escape(" \u00b7 ".join(meta))}</span>'
+                             if meta else '')
+                tag_rows.append(
+                    f'<li><code>{escape(self._pull_ref(img["name"], t["tag"]))}</code>'
+                    f' {meta_html}</li>')
+            items.append(
+                f'<article class="image">\n'
+                f'  <h3>{escape(img["name"])}</h3>\n'
+                f'  <ul class="tag-list">\n' + '\n'.join(tag_rows) + '\n  </ul>\n'
+                f'</article>')
+        return f'<div class="image-list">\n' + '\n'.join(items) + '\n</div>'
+
+    def landing_section(self):
+        return f'''<section class="source">
+  <h2><a href="/{self.slug}/">{escape(self.title)}</a></h2>
+  <p class="source-desc">{escape(self.description)}</p>
+  {self.render_image_list()}
+</section>'''
+
+    def instructions(self):
+        url = self.registry_url or '<registry>'
+        return f'''<section class="instructions">
+  <h2>Setup</h2>
+  <p>Pull images from this registry with the Docker client:</p>
+  <ol>
+    <li>Log in to the registry (if it requires authentication):
+      <pre><code>docker login {escape(url)}</code></pre></li>
+    <li>Pull an image by its tag:
+      <pre><code>docker pull {escape(url)}/&lt;image&gt;:&lt;tag&gt;</code></pre></li>
+  </ol>
+  <p>The registry API endpoint is <code>{escape(url)}/v2/</code>.</p>
+</section>'''
+
+    def write(self, base_dir):
+        os.makedirs(base_dir, exist_ok=True)
+        body = f'''<header>
+  <h1><a href="/">{escape(SITE_TITLE)}</a></h1>
+  <p class="subtitle">{escape(SITE_SUBTITLE)}</p>
+</header>
+<main>
+  {back_arrow('/', 'Available Software')}
+  {self.instructions()}
+  <h2>Images</h2>
+  {self.render_image_list()}
+</main>
+'''
+        with open(os.path.join(base_dir, 'index.html'), 'w') as f:
+            f.write(page(f'{self.title} — {SITE_TITLE}', body))
+
+
 def render_landing(sources):
     sections = '\n'.join(src.landing_section() for src in sources)
     body = f'''<header>
@@ -299,7 +513,8 @@ def main():
     repo_name = repo.get('name') or 'App Store'
     fingerprint = load_fingerprint()
 
-    sources = [AndroidSource(index, fingerprint, repo_url, repo_name)]
+    sources = [AndroidSource(index, fingerprint, repo_url, repo_name),
+               DockerSource(DOCKER_REGISTRY_URL)]
 
     with open(os.path.join(WEBUI_DIR, 'index.html'), 'w') as f:
         f.write(render_landing(sources))
